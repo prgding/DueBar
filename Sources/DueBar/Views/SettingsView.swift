@@ -1,9 +1,13 @@
 import SwiftUI
 
-/// Inline settings page: menu-bar label mode, filters, and per-list visibility.
+/// Inline settings page: launch-at-login, menu-bar label mode, filters, and
+/// per-list visibility.
 struct SettingsView: View {
     @Environment(SettingsStore.self) private var settings
     @Environment(RemindersService.self) private var service
+
+    @State private var launchAtLogin = false
+    @State private var loginError: String?
 
     private let horizons: [(name: String, value: Int?)] =
         [("全部", nil), ("7 天内", 7), ("30 天内", 30), ("90 天内", 90)]
@@ -11,6 +15,26 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                section("启动") {
+                    Toggle("开机自启", isOn: Binding(
+                        get: { launchAtLogin },
+                        set: { newValue in
+                            do {
+                                try LoginItem.setEnabled(newValue)
+                                loginError = nil
+                            } catch {
+                                loginError = "无法\(newValue ? "开启" : "关闭")开机自启：\(error.localizedDescription)"
+                            }
+                            launchAtLogin = LoginItem.isEnabled
+                        }
+                    ))
+                    .font(.system(size: 12))
+                    if let loginError {
+                        Text(loginError)
+                            .font(.system(size: 10)).foregroundStyle(.red)
+                    }
+                }
+
                 section("菜单栏显示") {
                     Picker("", selection: Binding(
                         get: { settings.labelMode },
@@ -60,6 +84,7 @@ struct SettingsView: View {
             }
             .padding(14)
         }
+        .onAppear { launchAtLogin = LoginItem.isEnabled }
     }
 
     @ViewBuilder

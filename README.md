@@ -10,6 +10,7 @@ DueBar 只**读取**数据、不修改：所有事项仍以 Reminders.app 为准
 - 弹窗列表按截止日期升序（最紧迫/已逾期在最上），紧迫度配色：逾期红、今明天橙、一周内主色、更远次要色
 - 设置：按提醒列表筛选、是否显示已过期、时间范围（全部 / 7 / 30 / 90 天内）
 - 外部在提醒事项里增删改后自动刷新（监听 `EKEventStoreChanged`），并每 10 分钟重算一次（兜住跨午夜的天数滚动）
+- 设置里可开**开机自启**（`SMAppService`，可在「系统设置 › 通用 › 登录项」里管理）
 
 ## 构建与运行
 
@@ -20,6 +21,12 @@ Scripts/package_app.sh && open build/DueBar.app
 ```
 
 `package_app.sh` 会 `swift build -c release`、打成 `build/DueBar.app` 并做 ad-hoc 签名。
+
+安装到 `/Applications`（自动停旧实例、覆盖、重启）：
+
+```bash
+Scripts/package_app.sh --install
+```
 
 首次点击菜单栏图标时，弹窗会请求**提醒事项**访问权限；点「授权访问」并在系统弹窗里允许即可。
 

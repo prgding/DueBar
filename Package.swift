@@ -14,7 +14,10 @@ let package = Package(
         .executableTarget(
             name: "DueBar",
             path: "Sources/DueBar",
-            linkerSettings: [.linkedFramework("EventKit")]
+            linkerSettings: [
+                .linkedFramework("EventKit"),
+                .linkedFramework("ServiceManagement")
+            ]
         )
     ]
 )

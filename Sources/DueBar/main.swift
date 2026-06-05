@@ -15,6 +15,11 @@ guard Bundle.main.bundlePath.hasSuffix(".app") else {
     exit(1)
 }
 
+// One-shot login-item toggles — register/unregister and exit before the GUI
+// starts, so "launch at login" can be flipped from the command line too.
+if CommandLine.arguments.contains("--register-login")   { LoginItem.runCLI(enable: true) }
+if CommandLine.arguments.contains("--unregister-login") { LoginItem.runCLI(enable: false) }
+
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate

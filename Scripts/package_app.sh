@@ -19,4 +19,15 @@ xattr -d com.apple.FinderInfo "$APP_DIR" >/dev/null 2>&1 || true
 xattr -d "com.apple.fileprovider.fpfs#P" "$APP_DIR" >/dev/null 2>&1 || true
 codesign --force --deep --sign - "$APP_DIR" >/dev/null 2>&1 || true
 
+# `--install`: stop any running copy, replace /Applications/DueBar.app, relaunch.
+if [[ "${1:-}" == "--install" ]]; then
+  DEST="/Applications/DueBar.app"
+  pkill -f 'DueBar.app/Contents/MacOS/DueBar' 2>/dev/null || true
+  sleep 1
+  rm -rf "$DEST"
+  cp -R "$APP_DIR" "$DEST"
+  echo "installed -> $DEST"
+  open "$DEST"
+fi
+
 echo "$APP_DIR"
