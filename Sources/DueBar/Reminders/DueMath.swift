@@ -51,25 +51,27 @@ enum DueMath {
         }
     }
 
-    /// "HH:mm" remaining until `due` when a *timed* item is due within the next
-    /// 24 hours (e.g. "07:23"), else nil. All-day items (no time) never get a
-    /// sub-day countdown — their due moment is midnight, which isn't meaningful.
+    /// "HH:mm" remaining until `due` for a *timed* item due **today** with the
+    /// time still ahead (e.g. "07:23"), else nil. All-day items (no time) never
+    /// get a sub-day countdown, and a today-item whose time already passed falls
+    /// back to the day label ("今天"). "Today" is same-calendar-day, so an item due
+    /// tomorrow morning reads "明天", not a 22-hour countdown.
     static func hourMinuteRemaining(now: Date, due: Date, hasTime: Bool) -> String? {
         guard hasTime else { return nil }
         let interval = due.timeIntervalSince(now)
-        guard interval > 0, interval < 24 * 3600 else { return nil }
+        guard interval > 0, daysLeft(from: now, to: due) == 0 else { return nil }
         let minutes = Int(interval / 60)   // floor to the minute
         return String(format: "%02d:%02d", minutes / 60, minutes % 60)
     }
 
-    /// Badge text for the popover: the HH:mm countdown when due within 24h, else
-    /// the day-based label ("今天" / "明天" / "还剩 N 天" / "已过期 N 天").
+    /// Badge text for the popover: the HH:mm countdown for a timed item due today,
+    /// else the day-based label ("今天" / "明天" / "还剩 N 天" / "已过期 N 天").
     static func badgeText(now: Date, due: Date, hasTime: Bool) -> String {
         hourMinuteRemaining(now: now, due: due, hasTime: hasTime)
             ?? countdownText(daysLeft: daysLeft(from: now, to: due))
     }
 
-    /// Menu-bar token with the same within-24h countdown behavior.
+    /// Menu-bar token with the same today-countdown behavior.
     static func menuBarToken(now: Date, due: Date, hasTime: Bool) -> String {
         hourMinuteRemaining(now: now, due: due, hasTime: hasTime)
             ?? menuBarToken(daysLeft: daysLeft(from: now, to: due))
