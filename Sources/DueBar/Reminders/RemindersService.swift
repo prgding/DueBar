@@ -23,6 +23,12 @@ final class RemindersService {
     private(set) var lists: [ReminderList] = []
     private(set) var lastRefresh: Date?
     private(set) var lastError: String?
+    /// The instant `items` was last derived. Every "days left" — in the list and
+    /// in the menu bar — is computed against this single observed value, so the
+    /// two always agree and roll over together. Bumped on every refilter (popover
+    /// open, refresh, 10-min tick, settings change), which is what keeps the count
+    /// from going stale while the app runs for days.
+    private(set) var now: Date = Date()
 
     /// Set by `AppDelegate`: fires on the main actor whenever `items` changes, so
     /// the AppKit status item can re-render (AppKit can't observe `@Observable`).
@@ -94,18 +100,19 @@ final class RemindersService {
     /// Re-derive `items` from `rawItems` per current settings — no EventKit hit.
     /// Cheap, so it's safe to call on any settings change (incl. label-only ones).
     func refilter() {
-        let now = Date()
+        let current = Date()
+        now = current
         var result = rawItems
 
         if let selected = settings.selectedListIDs {
             result = result.filter { selected.contains($0.listID) }
         }
         if !settings.includeOverdue {
-            result = result.filter { DueMath.daysLeft(from: now, to: $0.due) >= 0 }
+            result = result.filter { DueMath.daysLeft(from: current, to: $0.due) >= 0 }
         }
         if let horizon = settings.horizonDays {
             result = result.filter {
-                let d = DueMath.daysLeft(from: now, to: $0.due)
+                let d = DueMath.daysLeft(from: current, to: $0.due)
                 return d < 0 || d <= horizon   // keep overdue; cap upcoming
             }
         }

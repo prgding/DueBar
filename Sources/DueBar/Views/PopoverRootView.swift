@@ -55,7 +55,7 @@ struct PopoverRootView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(service.items) { item in
-                            CountdownRow(item: item, now: Date())
+                            CountdownRow(item: item, now: service.now)
                             Divider().padding(.leading, 30)
                         }
                     }

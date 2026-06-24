@@ -46,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func renderLabel() {
         guard let button = statusItem?.button else { return }
-        LabelRenderer.render(button: button, mode: settings.labelMode, nearest: service.nearest)
+        LabelRenderer.render(button: button, mode: settings.labelMode, nearest: service.nearest, now: service.now)
     }
 
     // MARK: Popover
@@ -72,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             popover.performClose(sender)
         } else {
             navigator.page = .list
+            service.refilter()   // bump `now` so day counts reflect today, not whenever we last rendered
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
             Task { await service.refresh() }   // freshen on open
