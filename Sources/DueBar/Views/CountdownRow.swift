@@ -27,7 +27,7 @@ struct CountdownRow: View {
 
             Spacer(minLength: 8)
 
-            Text(DueMath.countdownText(daysLeft: daysLeft))
+            Text(DueMath.badgeText(now: now, due: item.due, hasTime: item.hasTime))
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .foregroundStyle(badgeColor)
                 .padding(.horizontal, 8)

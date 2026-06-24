@@ -81,10 +81,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     // MARK: Periodic tick
 
-    /// Recompute every 10 min so "还剩 N 天" rolls over after midnight even when
-    /// Reminders.app posts no change notification. `refilter()` is cheap.
+    /// Recompute every minute so the within-24h "HH:mm" countdown actually ticks
+    /// (and "还剩 N 天" still rolls over after midnight) even when Reminders.app
+    /// posts no change notification. `refilter()` only re-derives from cached data
+    /// — no EventKit hit — so a 60s cadence is cheap.
     private func startTickTimer() {
-        tickTimer = Timer.scheduledTimer(withTimeInterval: 600, repeats: true) { [weak self] _ in
+        tickTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
                 self.service.refilter()

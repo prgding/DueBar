@@ -44,7 +44,7 @@ enum LabelRenderer {
     }
 
     private static func token(for item: CountdownItem, now: Date) -> String {
-        DueMath.menuBarToken(daysLeft: DueMath.daysLeft(from: now, to: item.due))
+        DueMath.menuBarToken(now: now, due: item.due, hasTime: item.hasTime)
     }
 
     private static func truncate(_ s: String, max: Int) -> String {

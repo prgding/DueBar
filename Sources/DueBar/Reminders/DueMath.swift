@@ -51,6 +51,30 @@ enum DueMath {
         }
     }
 
+    /// "HH:mm" remaining until `due` when a *timed* item is due within the next
+    /// 24 hours (e.g. "07:23"), else nil. All-day items (no time) never get a
+    /// sub-day countdown — their due moment is midnight, which isn't meaningful.
+    static func hourMinuteRemaining(now: Date, due: Date, hasTime: Bool) -> String? {
+        guard hasTime else { return nil }
+        let interval = due.timeIntervalSince(now)
+        guard interval > 0, interval < 24 * 3600 else { return nil }
+        let minutes = Int(interval / 60)   // floor to the minute
+        return String(format: "%02d:%02d", minutes / 60, minutes % 60)
+    }
+
+    /// Badge text for the popover: the HH:mm countdown when due within 24h, else
+    /// the day-based label ("今天" / "明天" / "还剩 N 天" / "已过期 N 天").
+    static func badgeText(now: Date, due: Date, hasTime: Bool) -> String {
+        hourMinuteRemaining(now: now, due: due, hasTime: hasTime)
+            ?? countdownText(daysLeft: daysLeft(from: now, to: due))
+    }
+
+    /// Menu-bar token with the same within-24h countdown behavior.
+    static func menuBarToken(now: Date, due: Date, hasTime: Bool) -> String {
+        hourMinuteRemaining(now: now, due: due, hasTime: hasTime)
+            ?? menuBarToken(daysLeft: daysLeft(from: now, to: due))
+    }
+
     /// Weekday with a relative-week prefix, on the Chinese Monday-first week:
     /// this week → "本周五", next week → "下周二", anything else (incl. past) → "周五".
     static func weekdayLabel(for due: Date, now: Date, calendar: Calendar = .current) -> String {
