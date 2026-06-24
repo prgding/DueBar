@@ -50,4 +50,23 @@ enum DueMath {
         default:                 return "逾期\(-daysLeft)"
         }
     }
+
+    /// Weekday with a relative-week prefix, on the Chinese Monday-first week:
+    /// this week → "本周五", next week → "下周二", anything else (incl. past) → "周五".
+    static func weekdayLabel(for due: Date, now: Date, calendar: Calendar = .current) -> String {
+        var cal = calendar
+        cal.firstWeekday = 2   // Monday
+        let names = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
+        let name = names[cal.component(.weekday, from: due) - 1]   // .weekday: 1=Sun … 7=Sat
+        guard let thisWeek = cal.dateInterval(of: .weekOfYear, for: now)?.start,
+              let dueWeek = cal.dateInterval(of: .weekOfYear, for: due)?.start else { return name }
+        // Both are week-start midnights, so the day gap is a clean multiple of 7
+        // (robust across year boundaries, unlike subtracting weekOfYear fields).
+        let weeks = (cal.dateComponents([.day], from: thisWeek, to: dueWeek).day ?? 0) / 7
+        switch weeks {
+        case 0:  return "本" + name
+        case 1:  return "下" + name
+        default: return name
+        }
+    }
 }

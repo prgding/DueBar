@@ -51,9 +51,15 @@ struct CountdownRow: View {
     }
 
     private var dueString: String {
+        let weekday = DueMath.weekdayLabel(for: item.due, now: now)
         let f = DateFormatter()
         f.locale = Locale(identifier: "zh_CN")
-        f.dateFormat = item.hasTime ? "M月d日 HH:mm" : "M月d日"
-        return f.string(from: item.due)
+        f.dateFormat = "M月d日"
+        var s = "\(f.string(from: item.due)) \(weekday)"
+        if item.hasTime {
+            f.dateFormat = "HH:mm"
+            s += " " + f.string(from: item.due)
+        }
+        return s
     }
 }
